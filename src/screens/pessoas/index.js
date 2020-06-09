@@ -1,21 +1,31 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Col, Row, Table } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-import pessoaService from 'services/pessoa';
+import pessoaService from 'services/pessoa-service';
 import ModalRemocao from './modal-remocao';
 
 export default function ListaPessoa() {
     const [pessoas, setPessoas] = useState([]);
     const [pessoaRemover, setPessoaRemover] = useState(null);
 
+    const listaPessoas = () => {
+        pessoaService
+            .getPessoas()
+            .then(pessoas => setPessoas(pessoas));
+    };
+    
     const removerPessoa = (pessoa) => {
-        pessoaService.removePessoa(pessoa.codigo);
-        setPessoaRemover(null);
-        setPessoas(pessoaService.getPessoas());
+        pessoaService
+            .removePessoa(pessoa.codigo)
+            .then(() => {
+                setPessoaRemover(null);
+                listaPessoas();
+            });
+
     };
 
     useEffect(() => {
-        setPessoas(pessoaService.getPessoas());
+        listaPessoas();
     }, []);
 
     return (<>

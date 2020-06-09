@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Col, Form, Badge } from 'react-bootstrap';
 import { useParams, useHistory } from 'react-router-dom';
-import pessoaService from 'services/pessoa';
+import pessoaService from 'services/pessoa-service';
 
 export default function FormularioPessoa() {
     const history = useHistory();
@@ -9,21 +9,25 @@ export default function FormularioPessoa() {
     const [state, setState] = useState({ codigo: '', nome: '', sobrenome: '', dataNascimento: '' });
 
     useEffect(() => {
-        const pessoa = pessoaService.getPessoa(codigo);
-        setState({ ...pessoa });
-    }, [codigo]);
+        pessoaService
+            .getPessoa(codigo)
+            .then(pessoa => setState(pessoa))
+            .catch(x => history.push('/pessoas'));
+        ;
+    }, [codigo, history]);
 
     const handleChange = (event) => {
         setState({ ...state, [event.target.name]: event.target.value });
     }
 
     const salvar = () => {
+        let operation;
         if (state.codigo)
-            pessoaService.atualizaPessoa(state.codigo, state);
+            operation = pessoaService.atualizaPessoa(state.codigo, state)
         else
-            pessoaService.adicionaPessoa({ ...state, codigo: Math.floor(Math.random() * 999999) });
+            operation = pessoaService.adicionaPessoa({ ...state, codigo: Math.floor(Math.random() * 999999) });
 
-        history.push('/pessoas');
+        operation.then(x => history.push('/pessoas'));
     }
 
     return (
